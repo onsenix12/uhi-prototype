@@ -121,11 +121,17 @@ const GroundElement = ({ data, onHover }) => {
   );
 };
 
-// Ground Plane
+// Ground Plane with warm heat-field styling
 const Ground = () => (
-  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
-    <planeGeometry args={[20, 20]} />
-    <meshStandardMaterial color="#e5e7eb" />
+  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.11, 0]} receiveShadow>
+    <planeGeometry args={[24, 24]} />
+    <meshStandardMaterial
+      color="#f97316"
+      emissive="#ea580c"
+      emissiveIntensity={0.25}
+      roughness={0.8}
+      metalness={0.1}
+    />
   </mesh>
 );
 
@@ -133,11 +139,6 @@ const Ground = () => (
 const BuildingScene = ({ onTowerSelect, selectedTower }) => {
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 10, 5]} intensity={0.8} />
-      <directionalLight position={[-10, 10, -5]} intensity={0.4} />
-
       {/* Ground */}
       <Ground />
 
@@ -196,6 +197,13 @@ const Building3DView = ({ onNavigate }) => {
               selectedTower={selectedTower}
             />
           </HeatCanvas>
+
+          {/* Slide-style title banner */}
+          <div className="absolute top-4 left-4 bg-sky-500/95 text-white px-4 py-2 rounded-lg shadow-xl">
+            <p className="text-sm font-semibold tracking-wide uppercase">
+              Conduct Thermal Comfort Study
+            </p>
+          </div>
 
           {/* Controls overlay */}
           <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-3">

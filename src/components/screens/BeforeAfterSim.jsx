@@ -20,13 +20,16 @@ import HeatCanvas from "../HeatCanvas";
 const SimplifiedBuilding = ({ data }) => {
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 5, 5]} intensity={0.8} />
-
-      {/* Ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
-        <planeGeometry args={[12, 12]} />
-        <meshStandardMaterial color="#e5e7eb" />
+      {/* Ground picking up warm heat color, lighting comes from HeatCanvas */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.11, 0]} receiveShadow>
+        <planeGeometry args={[16, 16]} />
+        <meshStandardMaterial
+          color="#f97316"
+          emissive="#ea580c"
+          emissiveIntensity={0.25}
+          roughness={0.8}
+          metalness={0.1}
+        />
       </mesh>
 
       {/* Towers */}
