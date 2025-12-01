@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Map as MapIcon,
-  TrendingUp,
-  TrendingDown,
-  ChevronRight,
-} from "lucide-react";
+import { Map as MapIcon, TrendingUp, TrendingDown } from "lucide-react";
 import { bishanEstates } from "../../data/mockData";
 import { getStatusColor, formatTemp } from "../../utils/heatColors";
 import { getDistrictAverage, getUserEstate } from "../../utils/district";
