@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import {
   GitCompare,
@@ -15,6 +14,7 @@ import {
   interventions,
 } from "../../data/mockData";
 import { getTempColor } from "../../utils/heatColors";
+import HeatCanvas from "../HeatCanvas";
 
 // Simplified Building for comparison view
 const SimplifiedBuilding = ({ data }) => {
@@ -140,9 +140,9 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                   </span>
                 </div>
                 <div style={{ height: "350px" }}>
-                  <Canvas camera={{ position: [10, 10, 10], fov: 50 }}>
+                  <HeatCanvas camera={{ position: [10, 10, 10], fov: 50 }}>
                     <SimplifiedBuilding data={buildingHeatData} />
-                  </Canvas>
+                  </HeatCanvas>
                 </div>
               </div>
 
@@ -155,9 +155,9 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                   </span>
                 </div>
                 <div style={{ height: "350px" }}>
-                  <Canvas camera={{ position: [10, 10, 10], fov: 50 }}>
+                  <HeatCanvas camera={{ position: [10, 10, 10], fov: 50 }}>
                     <SimplifiedBuilding data={buildingHeatDataAfter} />
-                  </Canvas>
+                  </HeatCanvas>
                 </div>
               </div>
             </div>
@@ -165,9 +165,9 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
             <div className="relative" style={{ height: "400px" }}>
               {/* Before (full width) */}
               <div className="absolute inset-0">
-                <Canvas camera={{ position: [12, 12, 12], fov: 50 }}>
+                <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
                   <SimplifiedBuilding data={buildingHeatData} />
-                </Canvas>
+                </HeatCanvas>
               </div>
 
               {/* After (clipped) */}
@@ -181,9 +181,9 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                     height: "100%",
                   }}
                 >
-                  <Canvas camera={{ position: [12, 12, 12], fov: 50 }}>
+                  <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
                     <SimplifiedBuilding data={buildingHeatDataAfter} />
-                  </Canvas>
+                  </HeatCanvas>
                 </div>
               </div>
 
@@ -220,32 +220,32 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
             </div>
           ) : (
             /* Single view (before or after) */
-            <div style={{ height: "400px" }}>
-              <div
-                className={`${
-                  viewMode === "before" ? "bg-red-50" : "bg-green-50"
-                } px-4 py-2 text-center`}
-              >
-                <span
+              <div style={{ height: "400px" }}>
+                <div
                   className={`${
-                    viewMode === "before"
-                      ? "text-red-700"
-                      : "text-green-700"
-                  } font-bold uppercase`}
+                    viewMode === "before" ? "bg-red-50" : "bg-green-50"
+                  } px-4 py-2 text-center`}
                 >
-                  {viewMode}
-                </span>
+                  <span
+                    className={`${
+                      viewMode === "before"
+                        ? "text-red-700"
+                        : "text-green-700"
+                    } font-bold uppercase`}
+                  >
+                    {viewMode}
+                  </span>
+                </div>
+                <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
+                  <SimplifiedBuilding
+                    data={
+                      viewMode === "before"
+                        ? buildingHeatData
+                        : buildingHeatDataAfter
+                    }
+                  />
+                </HeatCanvas>
               </div>
-              <Canvas camera={{ position: [12, 12, 12], fov: 50 }}>
-                <SimplifiedBuilding
-                  data={
-                    viewMode === "before"
-                      ? buildingHeatData
-                      : buildingHeatDataAfter
-                  }
-                />
-              </Canvas>
-            </div>
           )}
         </div>
 

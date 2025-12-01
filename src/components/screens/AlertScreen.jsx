@@ -10,13 +10,11 @@ import {
   Shield,
 } from "lucide-react";
 import { userBuilding, bishanEstates } from "../../data/mockData";
+import { getDistrictAverage, getUserEstate } from "../../utils/district";
 
 const AlertScreen = ({ onNavigate }) => {
-  const userEstate =
-    bishanEstates.find((e) => e.isUser) || bishanEstates[0];
-  const districtAvg =
-    bishanEstates.reduce((sum, e) => sum + e.tempDiff, 0) /
-    bishanEstates.length;
+  const userEstate = getUserEstate(bishanEstates);
+  const districtAvg = getDistrictAverage(bishanEstates);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">

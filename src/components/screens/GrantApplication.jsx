@@ -12,6 +12,7 @@ import { userBuilding, interventions } from "../../data/mockData";
 
 const GrantApplication = ({ onNavigate, selectedIntervention }) => {
   const [submitted, setSubmitted] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState(null);
   const [formData, setFormData] = useState({
     mcstResolution: false,
     quotation: false,
@@ -26,14 +27,17 @@ const GrantApplication = ({ onNavigate, selectedIntervention }) => {
   const allChecked = Object.values(formData).every((v) => v);
 
   const handleSubmit = () => {
+    if (!referenceNumber) {
+      const generated = `HRG-2025-${Math.random()
+        .toString(36)
+        .substr(2, 6)
+        .toUpperCase()}`;
+      setReferenceNumber(generated);
+    }
     setSubmitted(true);
   };
 
-  if (submitted) {
-    const referenceNumber = `HRG-2025-${Math.random()
-      .toString(36)
-      .substr(2, 6)
-      .toUpperCase()}`;
+  if (submitted && referenceNumber) {
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-6">

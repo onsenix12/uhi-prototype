@@ -1,9 +1,13 @@
 import React, { useState, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
-import { Info, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { buildingHeatData, userBuilding } from "../../data/mockData";
-import { getTempColor, formatTemp, getSeverityClass } from "../../utils/heatColors";
+import { getTempColor, formatTemp } from "../../utils/heatColors";
+import HeatCanvas from "../HeatCanvas";
+import TowerDetailsPanel from "../building3d/TowerDetailsPanel";
+import HotspotSummary from "../building3d/HotspotSummary";
+import BuildingOverview from "../building3d/BuildingOverview";
+import SidePanelTip from "../building3d/SidePanelTip";
 
 // Individual Tower Component
 const Tower = ({ data, onHover, onSelect, isSelected }) => {
@@ -186,18 +190,12 @@ const Building3DView = ({ onNavigate }) => {
       <div className="flex flex-col lg:flex-row h-[calc(100vh-100px)]">
         {/* 3D Canvas */}
         <div className="flex-1 relative">
-          <Canvas
-            camera={{ position: [15, 15, 15], fov: 50 }}
-            style={{
-              background:
-                "linear-gradient(to bottom, #e0f2fe, #f0f9ff)",
-            }}
-          >
+          <HeatCanvas camera={{ position: [15, 15, 15], fov: 50 }}>
             <BuildingScene
               onTowerSelect={setSelectedTower}
               selectedTower={selectedTower}
             />
-          </Canvas>
+          </HeatCanvas>
 
           {/* Controls overlay */}
           <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-3">
@@ -247,154 +245,22 @@ const Building3DView = ({ onNavigate }) => {
 
         {/* Side Panel */}
         <div className="w-full lg:w-96 bg-white border-l border-gray-200 overflow-y-auto">
-          {/* Tower Details (when selected) */}
           {selectedTower ? (
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-primary-800">
-                  {selectedTower.name}
-                </h2>
-                <button
-                  onClick={() => setSelectedTower(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="text-sm text-gray-500 mb-4">
-                {selectedTower.floors} floors •{" "}
-                {selectedTower.width * selectedTower.depth * 10} sqm
-                footprint
-              </div>
-
-              {/* Face temperatures */}
-              <div className="space-y-3">
-                <h3 className="font-medium text-gray-700">
-                  Surface Temperatures
-                </h3>
-                {Object.entries(selectedTower.faces).map(
-                  ([key, face]) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                    >
-                      <div>
-                        <div className="font-medium text-gray-800">
-                          {face.label}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {face.description}
-                        </div>
-                      </div>
-                      <div
-                        className="text-lg font-bold px-3 py-1 rounded"
-                        style={{
-                          backgroundColor: `${getTempColor(
-                            face.temp
-                          )}20`,
-                          color:
-                            face.temp > 38
-                              ? "#dc2626"
-                              : face.temp > 34
-                              ? "#ea580c"
-                              : "#16a34a",
-                        }}
-                      >
-                        {face.temp}°C
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
+            <TowerDetailsPanel
+              tower={selectedTower}
+              onClose={() => setSelectedTower(null)}
+            />
           ) : (
             <>
-              {/* Hotspot Summary */}
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-bold text-primary-800 mb-3 flex items-center gap-2">
-                  <Info className="w-5 h-5" />
-                  Hotspot Summary
-                </h2>
-                <div className="space-y-2">
-                  {buildingHeatData.hotspots.map((hotspot, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                    >
-                      <div>
-                        <div className="font-medium text-gray-800 text-sm">
-                          {hotspot.area}
-                        </div>
-                        <div className="text-orange-600 font-medium">
-                          {hotspot.temp}
-                        </div>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${getSeverityClass(
-                          hotspot.severity
-                        )}`}
-                      >
-                        {hotspot.severity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Building Overview */}
-              <div className="p-4 border-b">
-                <h3 className="font-medium text-gray-700 mb-3">
-                  Building Overview
-                </h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-gray-500">Towers</div>
-                    <div className="font-bold text-primary-800">
-                      {buildingHeatData.towers.length}
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-gray-500">Total Floors</div>
-                    <div className="font-bold text-primary-800">
-                      {buildingHeatData.towers.reduce(
-                        (sum, t) => sum + t.floors,
-                        0
-                      )}
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-gray-500">Avg Roof Temp</div>
-                    <div className="font-bold text-orange-500">
-                      {(
-                        buildingHeatData.towers.reduce(
-                          (sum, t) => sum + t.faces.roof.temp,
-                          0
-                        ) / 3
-                      ).toFixed(1)}
-                      °C
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-gray-500">Worst Area</div>
-                    <div className="font-bold text-red-500">Carpark</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tip */}
-              <div className="p-4 border-b bg-blue-50">
-                <p className="text-sm text-blue-700">
-                  💡 <strong>Tip:</strong> Click on any tower to see
-                  detailed surface temperatures for each face.
-                </p>
-              </div>
+              <HotspotSummary />
+              <BuildingOverview />
+              <SidePanelTip />
             </>
           )}
 
-          {/* Action Button */}
           <div className="p-4">
             <button
+              type="button"
               onClick={() => onNavigate("interventions")}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium"
             >

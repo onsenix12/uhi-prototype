@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import {
   HardHat,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { preConstructionData } from "../../data/mockData";
 import { getTempColor } from "../../utils/heatColors";
+import HeatCanvas from "../HeatCanvas";
 
 // Simplified building for design comparison
 const DesignModel = ({ isOptimized }) => {
@@ -167,9 +167,9 @@ const PreConstructionTeaser = ({ onNavigate }) => {
                   </span>
                 </div>
                 <div style={{ height: "350px" }}>
-                  <Canvas camera={{ position: [12, 12, 12], fov: 50 }}>
+                  <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
                     <DesignModel isOptimized={false} />
-                  </Canvas>
+                  </HeatCanvas>
                 </div>
                 <div className="p-4 bg-red-50">
                   <div className="text-center">
@@ -191,9 +191,9 @@ const PreConstructionTeaser = ({ onNavigate }) => {
                   </span>
                 </div>
                 <div style={{ height: "350px" }}>
-                  <Canvas camera={{ position: [12, 12, 12], fov: 50 }}>
+                  <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
                     <DesignModel isOptimized />
-                  </Canvas>
+                  </HeatCanvas>
                 </div>
                 <div className="p-4 bg-green-50">
                   <div className="text-center">
@@ -208,28 +208,28 @@ const PreConstructionTeaser = ({ onNavigate }) => {
               </div>
             </div>
           ) : (
-            <div>
-              <div
-                className={`${
-                  selectedView === "original" ? "bg-red-50" : "bg-green-50"
-                } px-4 py-2 text-center border-b`}
-              >
-                <span
+              <div>
+                <div
                   className={`${
-                    selectedView === "original"
-                      ? "text-red-700"
-                      : "text-green-700"
-                  } font-bold uppercase`}
+                    selectedView === "original" ? "bg-red-50" : "bg-green-50"
+                  } px-4 py-2 text-center border-b`}
                 >
-                  {selectedView} Design
-                </span>
+                  <span
+                    className={`${
+                      selectedView === "original"
+                        ? "text-red-700"
+                        : "text-green-700"
+                    } font-bold uppercase`}
+                  >
+                    {selectedView} Design
+                  </span>
+                </div>
+                <div style={{ height: "400px" }}>
+                  <HeatCanvas camera={{ position: [14, 14, 14], fov: 50 }}>
+                    <DesignModel isOptimized={selectedView === "optimized"} />
+                  </HeatCanvas>
+                </div>
               </div>
-              <div style={{ height: "400px" }}>
-                <Canvas camera={{ position: [14, 14, 14], fov: 50 }}>
-                  <DesignModel isOptimized={selectedView === "optimized"} />
-                </Canvas>
-              </div>
-            </div>
           )}
         </div>
 

@@ -1,25 +1,22 @@
 import React, { useState } from "react";
 import {
   Map as MapIcon,
-  Building2,
   TrendingUp,
   TrendingDown,
   ChevronRight,
 } from "lucide-react";
-import { bishanEstates, userBuilding } from "../../data/mockData";
+import { bishanEstates } from "../../data/mockData";
 import { getStatusColor, formatTemp } from "../../utils/heatColors";
+import { getDistrictAverage, getUserEstate } from "../../utils/district";
+import StatsBar from "../district/StatsBar";
+import YourEstatePanel from "../district/YourEstatePanel";
 
 const DistrictView = ({ onNavigate }) => {
   const [hoveredEstate, setHoveredEstate] = useState(null);
   const [viewMode, setViewMode] = useState("map"); // 'map' or 'list'
 
-  const districtAvg =
-    bishanEstates.reduce((sum, e) => sum + e.tempDiff, 0) /
-    bishanEstates.length;
-  const userEstate =
-    bishanEstates.find((e) => e.isUser) ||
-    bishanEstates.find((e) => e.name === userBuilding.name) ||
-    bishanEstates[0];
+  const districtAvg = getDistrictAverage(bishanEstates);
+  const userEstate = getUserEstate(bishanEstates);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -35,36 +32,7 @@ const DistrictView = ({ onNavigate }) => {
       </div>
 
       {/* Stats Bar */}
-      <div className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary-800">
-                {bishanEstates.length}
-              </div>
-              <div className="text-sm text-gray-500">Estates Monitored</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                +{districtAvg.toFixed(1)}°C
-              </div>
-              <div className="text-sm text-gray-500">District Average</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                +{bishanEstates[0].tempDiff}°C
-              </div>
-              <div className="text-sm text-gray-500">Best Performer</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                +{bishanEstates[bishanEstates.length - 1].tempDiff}°C
-              </div>
-              <div className="text-sm text-gray-500">Needs Improvement</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StatsBar estates={bishanEstates} districtAvg={districtAvg} />
 
       {/* View Toggle */}
       <div className="max-w-6xl mx-auto px-6 py-4">
@@ -312,78 +280,13 @@ const DistrictView = ({ onNavigate }) => {
           </div>
 
           {/* Side Panel - Your Estate Summary */}
-          <div className="w-full lg:w-80">
-            <div className="bg-white rounded-xl shadow-lg p-4 lg:sticky lg:top-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Building2 className="w-5 h-5 text-primary-700" />
-                <h3 className="font-bold text-primary-800">
-                  Your Estate
-                </h3>
-              </div>
-
-              <div className="text-center py-4 border-b">
-                <div className="text-3xl font-bold text-orange-500 mb-1">
-                  {formatTemp(userEstate.tempDiff)}
-                </div>
-                <div className="text-sm text-gray-500">above baseline</div>
-                <div className="mt-2 inline-flex items-center px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                  Rank #{userEstate.rank} of {bishanEstates.length}
-                </div>
-              </div>
-
-              <div className="py-4 space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">vs District Average</span>
-                  <span
-                    className={
-                      userEstate.tempDiff > districtAvg
-                        ? "text-red-600 font-medium"
-                        : "text-green-600 font-medium"
-                    }
-                  >
-                    {formatTemp(
-                      userEstate.tempDiff - districtAvg,
-                      false
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">vs Best Performer</span>
-                  <span className="text-red-600 font-medium">
-                    {formatTemp(
-                      userEstate.tempDiff - bishanEstates[0].tempDiff,
-                      false
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Percentile</span>
-                  <span className="text-orange-600 font-medium">
-                    Bottom{" "}
-                    {Math.round(
-                      (userEstate.rank / bishanEstates.length) * 100
-                    )}
-                    %
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <p className="text-sm text-gray-600 mb-4">
-                  Your estate has potential for significant improvement.
-                  View your building&apos;s heat map to identify hotspots.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onNavigate && onNavigate("building")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium"
-                >
-                  View 3D Building Analysis
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
+          <YourEstatePanel
+            userEstate={userEstate}
+            estatesCount={bishanEstates.length}
+            districtAvg={districtAvg}
+            bestTempDiff={bishanEstates[0].tempDiff}
+            onNavigate={onNavigate}
+          />
         </div>
       </div>
     </div>
