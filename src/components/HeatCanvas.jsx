@@ -1,5 +1,6 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
 
 const HeatCanvas = ({
   children,
@@ -23,16 +24,17 @@ const HeatCanvas = ({
       gl={{ antialias: true, alpha: true }}
     >
       {/* Shared modern lighting & subtle depth */}
-      <ambientLight intensity={0.55} />
+      <ambientLight intensity={0.3} />
       <directionalLight
-        position={[14, 18, 10]}
-        intensity={1}
+        position={[10, 20, 10]}
+        intensity={1.2}
         castShadow
-        color="#fde68a"
+        shadow-mapSize={[2048, 2048]}
       />
-      <directionalLight position={[-12, 10, -8]} intensity={0.35} color="#fecaca" />
       {/* Subtle atmospheric depth */}
       <fog attach="fog" args={["#7c2d12", 24, 80]} />
+      {/* Realistic environment reflections/lighting */}
+      <Environment preset="city" />
       {children}
     </Canvas>
   );

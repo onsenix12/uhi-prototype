@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
+import * as THREE from "three";
 import { OrbitControls, Html } from "@react-three/drei";
 import { ChevronRight } from "lucide-react";
 import { buildingHeatData, userBuilding } from "../../data/mockData";
@@ -13,6 +14,47 @@ import SidePanelTip from "../building3d/SidePanelTip";
 const Tower = ({ data, onHover, onSelect, isSelected }) => {
   const meshRef = useRef();
   const [hovered, setHovered] = useState(false);
+
+  // Simple procedural "window grid" texture using a small canvas
+  const windowTexture = useMemo(() => {
+    const size = 256;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+
+    // Base facade color (neutral gray, actual heat color comes from material tint)
+    ctx.fillStyle = "#222831";
+    ctx.fillRect(0, 0, size, size);
+
+    const cols = 8;
+    const rows = 12;
+    const padding = 6;
+    const cellW = size / cols;
+    const cellH = size / rows;
+
+    for (let i = 0; i < cols; i += 1) {
+      for (let j = 0; j < rows; j += 1) {
+        const x = i * cellW + padding;
+        const y = j * cellH + padding;
+        const w = cellW - padding * 2;
+        const h = cellH - padding * 2;
+
+        // Slight variation in window brightness
+        const brightness = 180 + Math.floor(Math.random() * 40);
+        ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
+        ctx.fillRect(x, y, w, h);
+      }
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 1);
+    texture.anisotropy = 4;
+
+    return texture;
+  }, []);
 
   // Calculate average temperature for tower color
   const avgTemp =
@@ -30,6 +72,8 @@ const Tower = ({ data, onHover, onSelect, isSelected }) => {
     <group position={data.position}>
       {/* Main tower body */}
       <mesh
+        castShadow
+        receiveShadow
         ref={meshRef}
         onPointerOver={(e) => {
           e.stopPropagation();
@@ -48,15 +92,84 @@ const Tower = ({ data, onHover, onSelect, isSelected }) => {
         <boxGeometry args={[data.width, data.height, data.depth]} />
         <meshStandardMaterial
           color={isSelected ? "#3b82f6" : hovered ? "#60a5fa" : baseColor}
+          map={windowTexture}
+          metalness={0.4}
+          roughness={0.6}
           transparent
           opacity={0.9}
         />
       </mesh>
 
+      {/* Subtle base podium to ground the tower visually */}
+      <mesh
+        castShadow
+        receiveShadow
+        position={[0, -data.height / 2 + 0.4, 0]}
+      >
+        <boxGeometry args={[data.width * 1.15, 0.8, data.depth * 1.15]} />
+        <meshStandardMaterial
+          color="#111827"
+          metalness={0.2}
+          roughness={0.85}
+        />
+      </mesh>
+
+      {/* Simple repeating balcony bands on one facade */}
+      {Array.from({ length: 5 }).map((_, i) => {
+        const levelY =
+          -data.height / 2 + 1.5 + (i * data.height) / 5; // evenly spaced
+        return (
+          <mesh
+            key={`balcony-${data.id}-${i}`}
+            castShadow
+            receiveShadow
+            position={[0, levelY, data.depth / 2 + 0.25]}
+          >
+            <boxGeometry
+              args={[data.width * 0.9, 0.18, Math.min(0.6, data.depth * 0.8)]}
+            />
+            <meshStandardMaterial
+              color="#e5e7eb"
+              metalness={0.1}
+              roughness={0.7}
+            />
+          </mesh>
+        );
+      })}
+
       {/* Roof highlight (hottest part) */}
-      <mesh position={[0, data.height / 2 + 0.1, 0]}>
+      <mesh position={[0, data.height / 2 + 0.1, 0]} castShadow>
         <boxGeometry args={[data.width, 0.2, data.depth]} />
         <meshStandardMaterial color={getTempColor(data.faces.roof.temp)} />
+      </mesh>
+
+      {/* Simple rooftop plant room / lift lobby */}
+      <mesh
+        castShadow
+        receiveShadow
+        position={[-data.width * 0.25, data.height / 2 + 0.7, -data.depth * 0.15]}
+      >
+        <boxGeometry
+          args={[data.width * 0.55, 1.2, data.depth * 0.6]}
+        />
+        <meshStandardMaterial
+          color="#374151"
+          metalness={0.25}
+          roughness={0.7}
+        />
+      </mesh>
+      {/* Small rooftop water tank element */}
+      <mesh
+        castShadow
+        receiveShadow
+        position={[data.width * 0.4, data.height / 2 + 1.0, data.depth * 0.1]}
+      >
+        <cylinderGeometry args={[0.4, 0.4, 0.9, 16]} />
+        <meshStandardMaterial
+          color="#6b7280"
+          metalness={0.6}
+          roughness={0.3}
+        />
       </mesh>
 
       {/* Tower label */}
@@ -85,30 +198,87 @@ const Tower = ({ data, onHover, onSelect, isSelected }) => {
   );
 };
 
-// Ground Level Element Component
+// Ground Level Element Component (pool, garden, carpark, entrance)
 const GroundElement = ({ data, onHover }) => {
   const [hovered, setHovered] = useState(false);
   const color = getTempColor(data.temp);
 
+  const isPool = data.id === "pool";
+  const isGarden = data.id === "garden";
+  const isCarpark = data.id === "carpark";
+
   return (
-    <mesh
-      position={data.position}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        onHover(data);
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        onHover(null);
-      }}
-    >
-      <boxGeometry args={data.size} />
-      <meshStandardMaterial
-        color={hovered ? "#60a5fa" : color}
-        transparent
-        opacity={0.8}
-      />
+    <group position={data.position}>
+      {/* Base clickable heat patch */}
+      <mesh
+        castShadow
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          onHover(data);
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          onHover(null);
+        }}
+      >
+        <boxGeometry args={data.size} />
+        <meshStandardMaterial
+          color={hovered ? "#60a5fa" : color}
+          transparent
+          opacity={isPool ? 0.6 : 0.8}
+          metalness={isPool ? 0.7 : 0.1}
+          roughness={isPool ? 0.2 : 0.8}
+        />
+      </mesh>
+
+      {/* Extra visual context per element type */}
+      {isGarden && (
+        <group>
+          {/* A few simple trees (cylinder trunk + cone canopy) */}
+          {[[-1, 0, -0.5], [0.5, 0, 0.5], [1, 0, -1]].map((pos, idx) => (
+            <group key={idx} position={pos}>
+              <mesh position={[0, 0.4, 0]} castShadow>
+                <cylinderGeometry args={[0.05, 0.05, 0.8, 8]} />
+                <meshStandardMaterial color="#854d0e" />
+              </mesh>
+              <mesh position={[0, 1, 0]} castShadow>
+                <coneGeometry args={[0.5, 1.2, 8]} />
+                <meshStandardMaterial color="#15803d" />
+              </mesh>
+            </group>
+          ))}
+        </group>
+      )}
+
+      {isCarpark && (
+        <group>
+          {/* Simple white parking lines */}
+          {[ -2, -1, 0, 1, 2 ].map((x, idx) => (
+            <mesh key={idx} position={[x, data.size[1] / 2 + 0.01, 0]} receiveShadow>
+              <boxGeometry args={[0.1, 0.01, data.size[2] * 0.8]} />
+              <meshStandardMaterial color="#e5e5e5" />
+            </mesh>
+          ))}
+        </group>
+      )}
+
+      {isPool && (
+        <group>
+          {/* Slightly inset, more reflective water surface */}
+          <mesh position={[0, data.size[1] / 2 + 0.01, 0]} receiveShadow>
+            <boxGeometry args={[data.size[0] * 0.9, 0.02, data.size[2] * 0.9]} />
+            <meshStandardMaterial
+              color="#38bdf8"
+              metalness={0.9}
+              roughness={0.1}
+              transparent
+              opacity={0.85}
+            />
+          </mesh>
+        </group>
+      )}
+
       {hovered && (
         <Html center position={[0, 1, 0]}>
           <div className="bg-white shadow-lg rounded-lg p-2 text-xs whitespace-nowrap">
@@ -117,7 +287,7 @@ const GroundElement = ({ data, onHover }) => {
           </div>
         </Html>
       )}
-    </mesh>
+    </group>
   );
 };
 
