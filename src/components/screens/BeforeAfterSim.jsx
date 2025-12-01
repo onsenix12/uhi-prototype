@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { OrbitControls } from "@react-three/drei";
+import React, { useMemo, useState } from "react";
+import { OrbitControls, Html } from "@react-three/drei";
 import {
   GitCompare,
   ChevronRight,
@@ -16,19 +16,53 @@ import {
 import { getTempColor } from "../../utils/heatColors";
 import HeatCanvas from "../HeatCanvas";
 
+// Helper: derive an "after" dataset depending on selected intervention
+const getAfterDataForIntervention = (intervention) => {
+  if (!intervention) return buildingHeatDataAfter;
+
+  switch (intervention.id) {
+    case "cool-coating":
+      // Use detailed cool-roof scenario
+      return buildingHeatDataAfter;
+    case "cool-pavement": {
+      // Focus cooling on carpark/ground surfaces; towers remain as before
+      const base = buildingHeatData;
+      return {
+        ...base,
+        groundLevel: base.groundLevel.map((element) => {
+          if (element.id === "carpark") {
+            const reduced =
+              element.temp - (intervention.tempReduction || 2);
+            return {
+              ...element,
+              temp: Math.max(reduced, 26),
+            };
+          }
+          return element;
+        }),
+      };
+    }
+    default:
+      // For other interventions, reuse the cool-roof scenario but add disclaimer in UI
+      return buildingHeatDataAfter;
+  }
+};
+
 // Simplified Building for comparison view
-const SimplifiedBuilding = ({ data }) => {
+const SimplifiedBuilding = ({ data, variant, roofBeforeById, roofAfterById }) => {
+  const isAfter = variant === "after";
+
   return (
     <>
-      {/* Ground picking up warm heat color, lighting comes from HeatCanvas */}
+      {/* Ground plane (match main 3D view styling for consistency) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.11, 0]} receiveShadow>
         <planeGeometry args={[16, 16]} />
         <meshStandardMaterial
-          color="#f97316"
-          emissive="#ea580c"
-          emissiveIntensity={0.25}
-          roughness={0.8}
-          metalness={0.1}
+          color="#e5e7eb"
+          emissive="#9ca3af"
+          emissiveIntensity={0.08}
+          roughness={0.9}
+          metalness={0.05}
         />
       </mesh>
 
@@ -36,6 +70,14 @@ const SimplifiedBuilding = ({ data }) => {
       {data.towers.map((tower) => {
         const avgTemp =
           Object.values(tower.faces).reduce((sum, f) => sum + f.temp, 0) / 5;
+        const roofTemp = tower.faces.roof.temp;
+        const roofBefore = roofBeforeById[tower.id];
+        const roofAfter = roofAfterById[tower.id];
+        const roofDelta =
+          typeof roofBefore === "number" && typeof roofAfter === "number"
+            ? roofBefore - roofAfter
+            : null;
+
         return (
           <group key={tower.id} position={tower.position}>
             <mesh>
@@ -46,9 +88,21 @@ const SimplifiedBuilding = ({ data }) => {
             <mesh position={[0, tower.height / 2 + 0.1, 0]}>
               <boxGeometry args={[tower.width, 0.2, tower.depth]} />
               <meshStandardMaterial
-                color={getTempColor(tower.faces.roof.temp)}
+                // Slightly exaggerate cooling effect visually in AFTER view
+                color={getTempColor(isAfter ? roofTemp - 2 : roofTemp)}
               />
             </mesh>
+
+            {/* Clear label showing where improvement is applied (rooftops) */}
+            {isAfter && roofDelta !== null && roofDelta > 0 && (
+              <Html position={[0, tower.height / 2 + 1.2, 0]} center>
+                <div className="bg-white/95 border border-green-200 rounded-lg px-2 py-1 text-[10px] shadow-md whitespace-nowrap">
+                  <span className="font-semibold text-green-700">
+                    Roof cooled {roofDelta.toFixed(1)}°C
+                  </span>
+                </div>
+              </Html>
+            )}
           </group>
         );
       })}
@@ -82,11 +136,34 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
   // Use the selected intervention or default to first one
   const intervention = selectedIntervention || interventions[0];
 
+  // Derive AFTER dataset for current intervention
+  const afterData = useMemo(
+    () => getAfterDataForIntervention(intervention),
+    [intervention]
+  );
+
+  // Roof temperature maps for delta labels
+  const roofBeforeById = useMemo(() => {
+    const map = {};
+    buildingHeatData.towers.forEach((tower) => {
+      map[tower.id] = tower.faces.roof.temp;
+    });
+    return map;
+  }, []);
+
+  const roofAfterById = useMemo(() => {
+    const map = {};
+    afterData.towers.forEach((tower) => {
+      map[tower.id] = tower.faces.roof.temp;
+    });
+    return map;
+  }, [afterData]);
+
   // Calculate improvements
   const beforeAvgRoof =
     buildingHeatData.towers.reduce((sum, t) => sum + t.faces.roof.temp, 0) / 3;
   const afterAvgRoof =
-    buildingHeatDataAfter.towers.reduce(
+    afterData.towers.reduce(
       (sum, t) => sum + t.faces.roof.temp,
       0
     ) / 3;
@@ -103,6 +180,11 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
           </div>
           <p className="text-primary-200">
             Simulated impact of {intervention.name} on {userBuilding.name}
+          </p>
+          <p className="text-primary-200 text-xs mt-1 opacity-80">
+            3D before/after visuals are illustrative. Detailed cooling effects are shown
+            for Cool Roof Coating and Cool Pavement; other options reuse the cool roof
+            scenario.
           </p>
         </div>
       </div>
@@ -144,7 +226,12 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                 </div>
                 <div style={{ height: "350px" }}>
                   <HeatCanvas camera={{ position: [10, 10, 10], fov: 50 }}>
-                    <SimplifiedBuilding data={buildingHeatData} />
+                    <SimplifiedBuilding
+                      data={buildingHeatData}
+                      variant="before"
+                      roofBeforeById={roofBeforeById}
+                      roofAfterById={roofAfterById}
+                    />
                   </HeatCanvas>
                 </div>
               </div>
@@ -159,7 +246,12 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                 </div>
                 <div style={{ height: "350px" }}>
                   <HeatCanvas camera={{ position: [10, 10, 10], fov: 50 }}>
-                    <SimplifiedBuilding data={buildingHeatDataAfter} />
+                    <SimplifiedBuilding
+                      data={afterData}
+                      variant="after"
+                      roofBeforeById={roofBeforeById}
+                      roofAfterById={roofAfterById}
+                    />
                   </HeatCanvas>
                 </div>
               </div>
@@ -169,7 +261,12 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
               {/* Before (full width) */}
               <div className="absolute inset-0">
                 <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
-                  <SimplifiedBuilding data={buildingHeatData} />
+                  <SimplifiedBuilding
+                    data={buildingHeatData}
+                    variant="before"
+                    roofBeforeById={roofBeforeById}
+                    roofAfterById={roofAfterById}
+                  />
                 </HeatCanvas>
               </div>
 
@@ -185,7 +282,12 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                   }}
                 >
                   <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
-                    <SimplifiedBuilding data={buildingHeatDataAfter} />
+                    <SimplifiedBuilding
+                      data={afterData}
+                      variant="after"
+                      roofBeforeById={roofBeforeById}
+                      roofAfterById={roofAfterById}
+                    />
                   </HeatCanvas>
                 </div>
               </div>
@@ -240,13 +342,21 @@ const BeforeAfterSim = ({ onNavigate, selectedIntervention }) => {
                   </span>
                 </div>
                 <HeatCanvas camera={{ position: [12, 12, 12], fov: 50 }}>
-                  <SimplifiedBuilding
-                    data={
-                      viewMode === "before"
-                        ? buildingHeatData
-                        : buildingHeatDataAfter
-                    }
-                  />
+                  {viewMode === "before" ? (
+                    <SimplifiedBuilding
+                      data={buildingHeatData}
+                      variant="before"
+                      roofBeforeById={roofBeforeById}
+                      roofAfterById={roofAfterById}
+                    />
+                  ) : (
+                    <SimplifiedBuilding
+                      data={afterData}
+                      variant="after"
+                      roofBeforeById={roofBeforeById}
+                      roofAfterById={roofAfterById}
+                    />
+                  )}
                 </HeatCanvas>
               </div>
           )}

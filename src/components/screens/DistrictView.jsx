@@ -69,11 +69,11 @@ const DistrictView = ({ onNavigate }) => {
 
                 {/* Simplified Map Visualization */}
                 <div
-                  className="relative bg-gradient-to-br from-green-50 to-orange-50 rounded-lg"
+                  className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-orange-100 rounded-2xl border border-gray-100"
                   style={{ height: "400px" }}
                 >
                   {/* Grid lines for reference */}
-                  <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0 opacity-20">
                     {Array.from({ length: 10 }).map((_, i) => (
                       <div
                         key={`h-${i}`}
@@ -105,17 +105,22 @@ const DistrictView = ({ onNavigate }) => {
                         estate.isUser && onNavigate && onNavigate("building")
                       }
                     >
-                      {/* Marker dot */}
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 border-white shadow-md ${
-                          estate.isUser
-                            ? "ring-4 ring-blue-300 ring-opacity-50"
-                            : ""
-                        }`}
-                        style={{
-                          backgroundColor: getStatusColor(estate.status),
-                        }}
-                      />
+                      {/* Marker dot with subtle halo */}
+                      <div className="relative">
+                        {estate.isUser && (
+                          <div className="absolute inset-0 -m-2 rounded-full bg-blue-300/30 blur-sm" />
+                        )}
+                        <div
+                          className={`relative w-5 h-5 rounded-full border-[3px] border-white shadow-lg ${
+                            estate.isUser
+                              ? "ring-4 ring-blue-300 ring-opacity-60"
+                              : ""
+                          }`}
+                          style={{
+                            backgroundColor: getStatusColor(estate.status),
+                          }}
+                        />
+                      </div>
 
                       {/* Tooltip */}
                       {(hoveredEstate?.id === estate.id || estate.isUser) && (

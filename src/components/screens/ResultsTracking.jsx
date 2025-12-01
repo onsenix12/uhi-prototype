@@ -62,6 +62,58 @@ const ResultsTracking = ({ onNavigate }) => {
     },
   ];
 
+  const handleDownloadReport = () => {
+    const content = [
+      `Heat Resilience Report for ${userBuilding.name}`,
+      "",
+      `Temp reduction achieved: -${resultsSummary.tempReductionActual}°C (predicted -${resultsSummary.tempReductionPredicted}°C)`,
+      `Ranking improvement: #${resultsSummary.rankBefore} → #${resultsSummary.rankAfter}`,
+      `Energy savings: ${resultsSummary.energySavings}% (~$${resultsSummary.annualCostSavings.toLocaleString()}/year)`,
+      `CO₂ reduction: ${resultsSummary.carbonReduction}t/year`,
+    ].join("\n");
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "heat-resilience-report.txt";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShareResults = async () => {
+    const shareText = `${userBuilding.name} just reduced rooftop temperatures by -${resultsSummary.tempReductionActual}°C and improved its district rank from #${resultsSummary.rankBefore} to #${resultsSummary.rankAfter}.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Heat Resilience Results",
+          text: shareText,
+          url: window.location.href,
+        });
+        return;
+      } catch (e) {
+        // Ignore cancel errors and fall through to clipboard
+      }
+    }
+
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        // eslint-disable-next-line no-alert
+        alert("Summary copied to clipboard. Paste it into email or chat to share.");
+        return;
+      } catch (e) {
+        // Ignore and fall through
+      }
+    }
+
+    // eslint-disable-next-line no-alert
+    alert(shareText);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -377,6 +429,7 @@ const ResultsTracking = ({ onNavigate }) => {
         <div className="flex flex-wrap gap-4">
           <button
             type="button"
+            onClick={handleDownloadReport}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             <Download className="w-4 h-4" />
@@ -384,6 +437,7 @@ const ResultsTracking = ({ onNavigate }) => {
           </button>
           <button
             type="button"
+            onClick={handleShareResults}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             <Share2 className="w-4 h-4" />
