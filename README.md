@@ -1,70 +1,112 @@
-# Getting Started with Create React App
+## Heat Resilience Dashboard (UHI Prototype)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Heat Resilience Dashboard** is a prototype web app for **urban heat island monitoring** and **cooling intervention planning** for private estates (e.g. MCST / condo management).  
+It combines a district overview, 3D building heat map, AI-recommended interventions, impact simulation, grant workflow and post‑installation tracking into a single narrative demo.
 
-## Available Scripts
+### What this app demonstrates
 
-In the project directory, you can run:
+- **Home / Dashboard**: Summary of the user estate (Palm Gardens), showing current heat penalty vs district average, rank, and a prominent alert to explore interventions.
+- **Alert view**: A detailed heat alert comparing the estate against the **Bishan district** (best performer, district average, and the user estate).
+- **District view**: Map and ranking views of nearby estates, with tooltips and a “your estate” highlight that links into the building view.
+- **3D building heat analysis**: Interactive 3D model of towers and ground elements, with hotspots, tooltips and a side panel explaining issues and insights.
+- **AI intervention planning**: Ranked list of interventions with cooling impact, cost, ROI, grants, and co‑benefits.
+- **Before/after simulation**: 3D comparison of current vs post‑intervention heat, with projected temp reduction, savings and rank improvement.
+- **Grant application**: Guided, pre‑filled form for a government grant, including required documents and an auto‑generated reference number.
+- **Results tracking**: Post‑installation monitoring with charts, KPIs, timeline and award eligibility.
 
-### `npm start`
+### Tech stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React (Create React App)
+- **Styling**: Tailwind CSS + custom styling
+- **3D & visuals**: `react-three-fiber`, `@react-three/drei`, custom heat‑map components
+- **Icons**: `lucide-react`
+- **Charts**: `recharts`
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Running the app locally
 
-### `npm test`
+From the project root:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+npm start
+```
 
-### `npm run build`
+- **Dev server**: `http://localhost:3000`
+- The app is a pure front‑end prototype; no backend or external APIs are required.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+To build a production bundle:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Suggested demo flow (10–15 minutes)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+This is a narrative script you can follow when demoing.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Set the context (Home / Dashboard)**
+   - Explain that this is a **Heat Resilience Dashboard** for a single estate (Palm Gardens) within the Bishan district.  
+   - Highlight the **temperature delta** vs district average and the **rank badge**.  
+   - Point out the alert banner: “Your estate is warmer than 80% of buildings in Bishan” and click **“View Details”** → this navigates to the **Alert** screen.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. **Heat Alert & why action is needed**
+   - On the **Alert** screen, show:  
+     - Key metrics: `+X°C above baseline` and rank in the district.  
+     - Comparison bars: **best in district**, **district average**, **your estate**.  
+   - Briefly mention impact (higher AC costs, lower outdoor comfort).  
+   - Transition options:
+     - Click **“Compare with Neighbors”** to go to **District** view, or  
+     - Click **“View Building Hotspots”** to jump directly into the 3D building view.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. **District comparison (optional but useful)**
+   - In **District** view, show:
+     - Map mode: all estates plotted with color‑coded dots and tooltips.  
+     - Ranking mode: list of estates with ranks and temp differences.  
+   - Emphasize where the user estate sits in the ranking and that clicking the user estate leads to the **Building** view (or use the “Dashboard” button to navigate and then open Building).
 
-## Learn More
+4. **3D building heat map**
+   - In **Building 3D View**, demonstrate:
+     - Orbit and zoom controls (drag to rotate, scroll to zoom).  
+     - Hovering/clicking towers to see average surface temperature and hotspot details.  
+     - Side panel content: hotspot summary, building overview, and tips.  
+   - Conclude this section by clicking **“Explore Interventions”** at the bottom of the side panel to open **Intervention Options**.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+5. **AI‑recommended interventions**
+   - On **Recommended Interventions**:
+     - Explain that the system ranks interventions (e.g. cool roofs, shading, greenery) by **cooling impact**, **cost**, **grant coverage**, **ROI**, etc.  
+     - Click one intervention card to select it (note the selection ring and check icon).
+     - Point out the metrics grid (temp reduction, cost range, grant %, ROI years) and co‑benefits (energy, carbon, implementation time).  
+   - Click **“Simulate Impact”** to move to **Impact Simulation**.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+6. **Before/after impact simulation**
+   - In **Impact Simulation**:
+     - Show the default **Side by Side** mode (before vs after 3D view).  
+     - Optionally toggle modes (**slider**, **before**, **after**) to show different ways of visualising change.  
+     - Call out key KPIs: °C reduction, energy savings, cost savings, CO₂ reduction, and projected improvement in district rank.  
+   - Click **“Apply for Grant”** to proceed to **Grant Application**.
 
-### Code Splitting
+7. **Grant application journey**
+   - On **Grant Application**:
+     - Explain that building and intervention info is **pre‑filled** from earlier steps.  
+     - Show the estimated cost, grant %, and net cost.  
+     - Point out the auto‑attached supporting data.  
+     - Tick the required document checkboxes to enable **“Submit Application”** and click it.  
+   - Highlight the confirmation screen: reference number, grant amount, and what happens next.  
+   - Click **“Track Progress”** to go to **Results Tracking**.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+8. **Post‑installation results & storytelling**
+   - In **Results Tracking**:
+     - Walk through the headline cards: actual temp reduction, rank improvement, energy savings, CO₂ reduction.  
+     - Show the **before/after temperature chart** and the **project timeline**.  
+     - Mention award eligibility and the call‑to‑action buttons (download/share/report, explore more interventions).  
+   - Optionally return to **Dashboard** to close the loop and emphasise the full journey from **alert → analysis → planning → funding → verification**.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Tips for a smooth live demo
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Resolution**: Use a modern desktop browser at 1280px+ width so the layout shows both 3D and side panels nicely.
+- **Timing**: Spend ~1–2 minutes per major screen; you can skip the optional district step if you need a 7–8 minute version.
+- **Storyline**: Frame it from the perspective of an estate manager looking for **evidence‑based cooling investments** and **grant support**, guided end‑to‑end by this dashboard.
