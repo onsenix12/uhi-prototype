@@ -6,8 +6,9 @@ on:
       - master
   workflow_dispatch:
 
+# The GitHub token must have write access so the action can push to gh-pages
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-deploy:
