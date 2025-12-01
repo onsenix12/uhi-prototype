@@ -10,9 +10,9 @@ const HeatCanvas = ({
   const baseStyle = {
     width: "100%",
     height: "100%",
-    // Warm, radial heat-field background similar to slide
+    // Softer, less saturated background (cool-neutral vignette)
     background:
-      "radial-gradient(circle at center, #fed7aa 0%, #fb923c 35%, #c2410c 70%, #7c2d12 100%)",
+      "radial-gradient(circle at center, #f9fafb 0%, #e5e7eb 35%, #cbd5f5 70%, #1e293b 100%)",
     ...style,
   };
 
@@ -32,7 +32,7 @@ const HeatCanvas = ({
         shadow-mapSize={[2048, 2048]}
       />
       {/* Subtle atmospheric depth */}
-      <fog attach="fog" args={["#7c2d12", 24, 80]} />
+      <fog attach="fog" args={["#1f2937", 24, 80]} />
       {/* Realistic environment reflections/lighting */}
       <Environment preset="city" />
       {children}

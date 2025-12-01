@@ -291,16 +291,16 @@ const GroundElement = ({ data, onHover }) => {
   );
 };
 
-// Ground Plane with warm heat-field styling
+// Ground Plane with softer, neutral styling
 const Ground = () => (
   <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.11, 0]} receiveShadow>
     <planeGeometry args={[24, 24]} />
     <meshStandardMaterial
-      color="#f97316"
-      emissive="#ea580c"
-      emissiveIntensity={0.25}
-      roughness={0.8}
-      metalness={0.1}
+      color="#e5e7eb"
+      emissive="#9ca3af"
+      emissiveIntensity={0.08}
+      roughness={0.9}
+      metalness={0.05}
     />
   </mesh>
 );
