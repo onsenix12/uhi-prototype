@@ -8,7 +8,6 @@ import YourEstatePanel from "../district/YourEstatePanel";
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
 
 const DistrictView = ({ onNavigate }) => {
-  const [hoveredEstate, setHoveredEstate] = useState(null);
   const [viewMode, setViewMode] = useState("map"); // 'map' or 'list'
 
   const districtAvg = getDistrictAverage(bishanEstates);
@@ -98,8 +97,6 @@ const DistrictView = ({ onNavigate }) => {
                               onNavigate("building");
                             }
                           },
-                          mouseover: () => setHoveredEstate(estate),
-                          mouseout: () => setHoveredEstate(null),
                         }}
                       >
                         <Tooltip direction="top" offset={[0, -4]} opacity={1}>
