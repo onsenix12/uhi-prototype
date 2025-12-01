@@ -1,4 +1,6 @@
 // District estates data for Bishan
+// Note: lat/lng values are approximate but are positioned correctly within Singapore
+// so you can see where Bishan sits on the map and how the estates relate spatially.
 export const bishanEstates = [
   {
     id: 1,
@@ -6,7 +8,8 @@ export const bishanEstates = [
     tempDiff: 0.8,
     rank: 1,
     status: "cool",
-    coords: { x: 35, y: 25 },
+    lat: 1.3524,
+    lng: 103.848,
   },
   {
     id: 2,
@@ -14,7 +17,8 @@ export const bishanEstates = [
     tempDiff: 1.1,
     rank: 2,
     status: "cool",
-    coords: { x: 55, y: 30 },
+    lat: 1.3509,
+    lng: 103.8435,
   },
   {
     id: 3,
@@ -22,7 +26,8 @@ export const bishanEstates = [
     tempDiff: 1.4,
     rank: 3,
     status: "mild",
-    coords: { x: 45, y: 45 },
+    lat: 1.354,
+    lng: 103.845,
   },
   {
     id: 4,
@@ -30,7 +35,8 @@ export const bishanEstates = [
     tempDiff: 1.5,
     rank: 4,
     status: "mild",
-    coords: { x: 25, y: 40 },
+    lat: 1.352,
+    lng: 103.851,
   },
   {
     id: 5,
@@ -38,7 +44,8 @@ export const bishanEstates = [
     tempDiff: 1.7,
     rank: 5,
     status: "mild",
-    coords: { x: 65, y: 50 },
+    lat: 1.3535,
+    lng: 103.8405,
   },
   {
     id: 6,
@@ -46,7 +53,8 @@ export const bishanEstates = [
     tempDiff: 1.8,
     rank: 6,
     status: "warm",
-    coords: { x: 30, y: 60 },
+    lat: 1.3495,
+    lng: 103.8465,
   },
   {
     id: 7,
@@ -54,7 +62,8 @@ export const bishanEstates = [
     tempDiff: 1.9,
     rank: 7,
     status: "warm",
-    coords: { x: 70, y: 35 },
+    lat: 1.349,
+    lng: 103.8505,
   },
   {
     id: 8,
@@ -62,7 +71,8 @@ export const bishanEstates = [
     tempDiff: 2.0,
     rank: 8,
     status: "warm",
-    coords: { x: 50, y: 65 },
+    lat: 1.3475,
+    lng: 103.845,
   },
   {
     id: 9,
@@ -70,7 +80,8 @@ export const bishanEstates = [
     tempDiff: 2.1,
     rank: 9,
     status: "warm",
-    coords: { x: 40, y: 75 },
+    lat: 1.3465,
+    lng: 103.8485,
   },
   {
     id: 10,
@@ -78,7 +89,8 @@ export const bishanEstates = [
     tempDiff: 2.2,
     rank: 10,
     status: "hot",
-    coords: { x: 60, y: 70 },
+    lat: 1.3545,
+    lng: 103.832,
   },
   {
     id: 11,
@@ -86,7 +98,8 @@ export const bishanEstates = [
     tempDiff: 2.2,
     rank: 11,
     status: "hot",
-    coords: { x: 20, y: 55 },
+    lat: 1.354,
+    lng: 103.839,
   },
   {
     id: 12,
@@ -95,7 +108,8 @@ export const bishanEstates = [
     rank: 12,
     status: "hot",
     isUser: true,
-    coords: { x: 48, y: 52 },
+    lat: 1.3515,
+    lng: 103.846,
   },
   {
     id: 13,
@@ -103,7 +117,8 @@ export const bishanEstates = [
     tempDiff: 2.5,
     rank: 13,
     status: "hot",
-    coords: { x: 75, y: 60 },
+    lat: 1.351,
+    lng: 103.842,
   },
   {
     id: 14,
@@ -111,7 +126,8 @@ export const bishanEstates = [
     tempDiff: 2.6,
     rank: 14,
     status: "extreme",
-    coords: { x: 28, y: 70 },
+    lat: 1.3485,
+    lng: 103.852,
   },
   {
     id: 15,
@@ -119,7 +135,8 @@ export const bishanEstates = [
     tempDiff: 2.8,
     rank: 15,
     status: "extreme",
-    coords: { x: 68, y: 78 },
+    lat: 1.355,
+    lng: 103.843,
   },
 ];
 

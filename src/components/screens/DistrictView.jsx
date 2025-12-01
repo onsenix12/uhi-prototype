@@ -5,6 +5,7 @@ import { getStatusColor, formatTemp } from "../../utils/heatColors";
 import { getDistrictAverage, getUserEstate } from "../../utils/district";
 import StatsBar from "../district/StatsBar";
 import YourEstatePanel from "../district/YourEstatePanel";
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
 
 const DistrictView = ({ onNavigate }) => {
   const [hoveredEstate, setHoveredEstate] = useState(null);
@@ -64,125 +65,100 @@ const DistrictView = ({ onNavigate }) => {
             {viewMode === "map" ? (
               <div className="bg-white rounded-xl shadow-lg p-4">
                 <h2 className="text-lg font-bold text-primary-800 mb-4">
-                  District Heat Map
+                  District Heat Map (Real Bishan Map)
                 </h2>
 
-                {/* Simplified Map Visualization */}
-                <div
-                  className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-orange-100 rounded-2xl border border-gray-100"
-                  style={{ height: "400px" }}
-                >
-                  {/* Grid lines for reference */}
-                  <div className="absolute inset-0 opacity-20">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <div
-                        key={`h-${i}`}
-                        className="absolute w-full border-t border-gray-400"
-                        style={{ top: `${i * 10}%` }}
-                      />
-                    ))}
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <div
-                        key={`v-${i}`}
-                        className="absolute h-full border-l border-gray-400"
-                        style={{ left: `${i * 10}%` }}
-                      />
-                    ))}
-                  </div>
+                {/* Real map of Bishan using OpenStreetMap tiles */}
+                <div className="rounded-2xl overflow-hidden border border-gray-100">
+                  <MapContainer
+                    center={[1.3515, 103.848]}
+                    zoom={15}
+                    scrollWheelZoom={false}
+                    style={{ height: "400px", width: "100%" }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
 
-                  {/* Estate markers */}
-                  {bishanEstates.map((estate) => (
-                    <div
-                      key={estate.id}
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all hover:scale-125 z-10"
-                      style={{
-                        left: `${estate.coords.x}%`,
-                        top: `${estate.coords.y}%`,
-                      }}
-                      onMouseEnter={() => setHoveredEstate(estate)}
-                      onMouseLeave={() => setHoveredEstate(null)}
-                      onClick={() =>
-                        estate.isUser && onNavigate && onNavigate("building")
-                      }
-                    >
-                      {/* Marker dot with subtle halo */}
-                      <div className="relative">
-                        {estate.isUser && (
-                          <div className="absolute inset-0 -m-2 rounded-full bg-blue-300/30 blur-sm" />
-                        )}
-                        <div
-                          className={`relative w-5 h-5 rounded-full border-[3px] border-white shadow-lg ${
-                            estate.isUser
-                              ? "ring-4 ring-blue-300 ring-opacity-60"
-                              : ""
-                          }`}
-                          style={{
-                            backgroundColor: getStatusColor(estate.status),
-                          }}
-                        />
-                      </div>
-
-                      {/* Tooltip */}
-                      {(hoveredEstate?.id === estate.id || estate.isUser) && (
-                        <div
-                          className={`absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-xl p-3 whitespace-nowrap z-20 ${
-                            estate.isUser ? "border-2 border-blue-500" : ""
-                          }`}
-                        >
-                          <div className="font-bold text-primary-800 text-sm">
-                            {estate.name}
-                            {estate.isUser && (
-                              <span className="text-blue-500 ml-1">
-                                (You)
+                    {bishanEstates.map((estate) => (
+                      <CircleMarker
+                        key={estate.id}
+                        center={[estate.lat, estate.lng]}
+                        radius={estate.isUser ? 10 : 7}
+                        pathOptions={{
+                          color: estate.isUser ? "#3b82f6" : getStatusColor(estate.status),
+                          weight: estate.isUser ? 3 : 2,
+                          fillColor: getStatusColor(estate.status),
+                          fillOpacity: 0.9,
+                        }}
+                        eventHandlers={{
+                          click: () => {
+                            if (estate.isUser && onNavigate) {
+                              onNavigate("building");
+                            }
+                          },
+                          mouseover: () => setHoveredEstate(estate),
+                          mouseout: () => setHoveredEstate(null),
+                        }}
+                      >
+                        <Tooltip direction="top" offset={[0, -4]} opacity={1}>
+                          <div className="space-y-1">
+                            <div className="font-bold text-primary-800 text-sm">
+                              {estate.name}
+                              {estate.isUser && (
+                                <span className="text-blue-500 ml-1">
+                                  (You)
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs">
+                              <span
+                                className="font-bold"
+                                style={{
+                                  color: getStatusColor(estate.status),
+                                }}
+                              >
+                                {formatTemp(estate.tempDiff)}
                               </span>
+                              <span className="text-gray-400">•</span>
+                              <span className="text-gray-500">
+                                Rank #{estate.rank}
+                              </span>
+                            </div>
+                            {estate.isUser && (
+                              <div className="text-[11px] text-blue-600 font-medium">
+                                Click marker to view building details
+                              </div>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span
-                              className="font-bold"
-                              style={{
-                                color: getStatusColor(estate.status),
-                              }}
-                            >
-                              {formatTemp(estate.tempDiff)}
-                            </span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-gray-500 text-sm">
-                              Rank #{estate.rank}
-                            </span>
-                          </div>
-                          {estate.isUser && (
-                            <div className="mt-2 text-xs text-blue-600 font-medium">
-                              Click to view details →
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        </Tooltip>
+                      </CircleMarker>
+                    ))}
+                  </MapContainer>
+                </div>
 
-                  {/* Legend */}
-                  <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow p-3">
-                    <div className="text-xs text-gray-500 mb-2 font-medium">
-                      Temperature Difference
+                {/* Legend */}
+                <div className="mt-4 inline-block bg-white rounded-lg shadow p-3">
+                  <div className="text-xs text-gray-500 mb-2 font-medium">
+                    Temperature Difference
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span>Cool (&lt;1.5°C)</span>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <span>Cool (&lt;1.5°C)</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                        <span>Warm (1.5-2.0°C)</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-3 h-3 rounded-full bg-orange-500" />
-                        <span>Hot (2.0-2.5°C)</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <span>Extreme (&gt;2.5°C)</span>
-                      </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      <span>Warm (1.5-2.0°C)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-3 h-3 rounded-full bg-orange-500" />
+                      <span>Hot (2.0-2.5°C)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                      <span>Extreme (&gt;2.5°C)</span>
                     </div>
                   </div>
                 </div>
